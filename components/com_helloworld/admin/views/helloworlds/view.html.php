@@ -26,9 +26,18 @@ class HelloWorldViewHelloWorlds extends JViewLegacy
 	 */
 	function display($tpl = null)
 	{
+		
+		// Get application
+		$app = JFactory::getApplication();
+		$context = "helloworld.list.admin.helloworld";
 		// Get data from the model
-		$this->items		= $this->get('Items');
-		$this->pagination	= $this->get('Pagination');
+		$this->items			= $this->get('Items');
+		$this->pagination		= $this->get('Pagination');
+		$this->state			= $this->get('State');
+		$this->filter_order 	= $app->getUserStateFromRequest($context.'filter_order', 'filter_order', 'greeting', 'cmd');
+		$this->filter_order_Dir = $app->getUserStateFromRequest($context.'filter_order_Dir', 'filter_order_Dir', 'asc', 'cmd');
+		$this->filterForm    	= $this->get('FilterForm');
+		$this->activeFilters 	= $this->get('ActiveFilters');
 
 		// Check for errors.
 		if (count($errors = $this->get('Errors')))
@@ -38,11 +47,14 @@ class HelloWorldViewHelloWorlds extends JViewLegacy
 			return false;
 		}
 
-		// Set the toolbar
+		// Set the toolbar and number of found items
 		$this->addToolBar();
 
 		// Display the template
 		parent::display($tpl);
+
+		// Set the document
+		$this->setDocument();
 	}
 
 	/**
@@ -54,9 +66,26 @@ class HelloWorldViewHelloWorlds extends JViewLegacy
 	 */
 	protected function addToolBar()
 	{
-		JToolbarHelper::title(JText::_('COM_HELLOWORLD_MANAGER_HELLOWORLDS'));
-		JToolbarHelper::addNew('helloworld.add');
-		JToolbarHelper::editList('helloworld.edit');
-		JToolbarHelper::deleteList('', 'helloworlds.delete');
+		$title = JText::_('COM_HELLOWORLD_MANAGER_HELLOWORLDS');
+
+		if ($this->pagination->total)
+		{
+			$title .= "<span style='font-size: 0.5em; vertical-align: middle;'>(" . $this->pagination->total . ")</span>";
+		}
+
+		JToolBarHelper::title($title, 'helloworld');
+		JToolBarHelper::deleteList('', 'helloworlds.delete');
+		JToolBarHelper::editList('helloworld.edit');
+		JToolBarHelper::addNew('helloworld.add');
+	}
+	/**
+	 * Method to set up the document properties
+	 *
+	 * @return void
+	 */
+	protected function setDocument() 
+	{
+		$document = JFactory::getDocument();
+		$document->setTitle(JText::_('COM_HELLOWORLD_ADMINISTRATION'));
 	}
 }
